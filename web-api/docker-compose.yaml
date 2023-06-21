@@ -1,0 +1,60 @@
+version: "3.5"
+
+services:
+  jaeger:
+    hostname: 'jaeger'
+    container_name: 'jaeger'
+    image: jaegertracing/all-in-one:1.6
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 14268:14268
+      - 14250:14250
+      - 9411:9411
+
+  address-api:
+    build:
+      context: '.'
+      dockerfile: 'Dockerfile-Address-Api'
+    hostname: 'address-api'
+    container_name: 'address-api'
+    ports:
+      - 8081:8081
+    links:
+      - jaeger
+    environment:
+      - 'JAEGER_SAMPLER_TYPE=probabilistic'
+      - 'JAEGER_SAMPLER_PARAM=1'
+      - 'JAEGER_SAMPLER_MANAGER_HOST_PORT=jeager:5778'
+      - 'JAEGER_REPORTER_LOG_SPANS=true'
+      - 'JAEGER_AGENT_HOST=jaeger'
+      - 'JAEGER_AGENT_PORT=6831'
+      - 'JAEGER_REPORTER_FLUSH_INTERVAL=1000'
+      - 'JAEGER_REPORTER_MAX_QUEUE_SIZE=100'
+      - 'JAEGER_SERVICE_NAME=address-api'
+
+  person-api:
+    build:
+      context: '.'
+      dockerfile: 'Dockerfile-Person-Api'
+    hostname: 'person-api'
+    container_name: 'person-api'
+    ports:
+      - 8080:8080
+    links:
+      - jaeger
+      - address-api
+    environment:
+      - 'ADDRESS_API_HOST=address-api'
+      - 'JAEGER_SAMPLER_TYPE=probabilistic'
+      - 'JAEGER_SAMPLER_PARAM=1'
+      - 'JAEGER_SAMPLER_MANAGER_HOST_PORT=jeager:5778'
+      - 'JAEGER_REPORTER_LOG_SPANS=true'
+      - 'JAEGER_AGENT_HOST=jaeger'
+      - 'JAEGER_AGENT_PORT=6831'
+      - 'JAEGER_REPORTER_FLUSH_INTERVAL=1000'
+      - 'JAEGER_REPORTER_MAX_QUEUE_SIZE=100'
+      - 'JAEGER_SERVICE_NAME=person-api'

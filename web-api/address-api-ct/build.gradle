@@ -1,0 +1,12 @@
+plugins {
+    id 'java-library'
+}
+
+group = 'io.joliveira'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+

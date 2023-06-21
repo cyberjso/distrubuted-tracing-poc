@@ -1,0 +1,29 @@
+plugins {
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dep.mgmt)
+    id 'java'
+}
+
+group = 'io.joliveira'
+sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+springBoot {
+    mainClass = 'io.joliveira.Application'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    implementation 'org.springframework:spring-webmvc'
+
+    implementation libs.opentracing.spring.web.start
+    implementation libs.bundles.jeager.open.tracing
+
+    compileOnly libs.java.ee.servlet
+
+    implementation project(path: ':address-api-ct')
+}
