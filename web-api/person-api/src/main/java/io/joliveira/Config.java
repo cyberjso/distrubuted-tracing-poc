@@ -17,7 +17,7 @@ public class Config {
     @Autowired
     private Environment environment;
 
-    @Bean
+    //@Bean
     public Tracer jaegertracer() {
         Configuration.SamplerConfiguration samplerConfig = Configuration
                 .SamplerConfiguration
@@ -43,6 +43,7 @@ public class Config {
 
         return config.getTracer();
     }
+
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {

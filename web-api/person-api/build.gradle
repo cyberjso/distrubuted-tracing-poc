@@ -23,6 +23,7 @@ java {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework:spring-webmvc'
 
     implementation libs.opentracing.spring.web.start
