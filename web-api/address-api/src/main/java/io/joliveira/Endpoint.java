@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class Endpoint {
 
     @GetMapping("address/{id}")
-    public Address findAddressBy(@PathVariable("id") String zipCode) {
-        return new Address(zipCode, "Farrapos Avenue", "POA");
+    public Address findAddressBy(@PathVariable("id") String id) {
+        return new Address(id, "Farrapos Avenue", "POA");
     }
 
 }

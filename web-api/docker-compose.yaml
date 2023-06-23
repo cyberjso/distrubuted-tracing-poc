@@ -74,6 +74,18 @@ services:
       - 'JAEGER_REPORTER_MAX_QUEUE_SIZE=100'
       - 'JAEGER_SERVICE_NAME=person-api'
 
+  postgres:
+    image: postgres
+    container_name: application-db
+    hostname: application-db
+    volumes:
+      - ./address-api/src/main/resources/01-address-table.sql:/docker-entrypoint-initdb.d/01-address-table.sql
+      - ./address-api/src/main/resources/02-address-data.sql:/docker-entrypoint-initdb.d/02-address-data.sql
+    environment:
+      POSTGRES_PASSWORD: "admin123"
+    ports:
+      - "5432:5432"
+
   otelcol:
     image: otel/opentelemetry-collector-contrib:0.76.1
     container_name: otel-col
