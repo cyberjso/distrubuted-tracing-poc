@@ -17,10 +17,25 @@ public class Endpoint {
     @GetMapping("address/{id}")
     public Address findAddressBy(@PathVariable("id") String id) {
         try {
+            delay(id);
+
             AddressEntity entity =  repository.getReferenceById(id);
             return new Address(id, entity.getStreet(), entity.getCity());
         } catch (EntityNotFoundException e) {
             throw new AddressNotFoundException("Address %s not found".formatted(id));
+        }
+    }
+
+    /**
+     * Explicitly adding a delay on requests with even Ids, so we can see them on the traces
+     */
+    private void delay(String id) {
+        try {
+            if (Integer.valueOf(id) % 2 == 0) {
+                Thread.sleep(5000);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error while trying to making the process to wait");
         }
     }
 
