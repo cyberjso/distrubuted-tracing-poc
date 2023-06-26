@@ -40,6 +40,7 @@ services:
       - 8081:8081
     links:
       - jaeger-agent
+      - application-db
     environment:
       - 'JAEGER_SAMPLER_TYPE=probabilistic'
       - 'JAEGER_SAMPLER_PARAM=1'
@@ -50,6 +51,7 @@ services:
       - 'JAEGER_REPORTER_FLUSH_INTERVAL=1000'
       - 'JAEGER_REPORTER_MAX_QUEUE_SIZE=100'
       - 'JAEGER_SERVICE_NAME=address-api'
+      - 'DATABASE_HOST=application-db'
 
   person-api:
     build:
@@ -61,7 +63,7 @@ services:
       - 8080:8080
     links:
       - jaeger-agent
-      - address-api
+      - application-db
     environment:
       - 'ADDRESS_API_HOST=address-api'
       - 'JAEGER_SAMPLER_TYPE=probabilistic'
@@ -73,14 +75,16 @@ services:
       - 'JAEGER_REPORTER_FLUSH_INTERVAL=1000'
       - 'JAEGER_REPORTER_MAX_QUEUE_SIZE=100'
       - 'JAEGER_SERVICE_NAME=person-api'
+      - 'DATABASE_HOST=application-db'
 
-  postgres:
-    image: postgres
+  application-db:
+    image: postgres:13.11
     container_name: application-db
     hostname: application-db
     volumes:
       - ./address-api/src/main/resources/01-address-table.sql:/docker-entrypoint-initdb.d/01-address-table.sql
       - ./address-api/src/main/resources/02-address-data.sql:/docker-entrypoint-initdb.d/02-address-data.sql
+      - ./person-api/src/main/resources/01-person-table.sql:/docker-entrypoint-initdb.d/01-person-table.sql
     environment:
       POSTGRES_PASSWORD: "admin123"
     ports:

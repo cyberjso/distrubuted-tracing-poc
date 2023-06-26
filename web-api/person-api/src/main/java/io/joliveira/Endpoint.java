@@ -8,13 +8,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
-
 @RestController
 public class Endpoint {
     @Autowired
-    private AddressApiClient addressApiClient;
-    @Autowired private Tracer tracer;
+    private
+    AddressApiClient addressApiClient;
+
+    @Autowired
+    private PersonRepository personRepository;
+
+    @Autowired
+    private Tracer tracer;
 
     @PostMapping("/person")
     public Person save(@RequestBody  Person person) {
@@ -24,11 +28,11 @@ public class Endpoint {
                 .asChildOf(serverSpan)
                 .start();
         try {
-            String id = UUID.randomUUID().toString();
             Address address = addressApiClient.findAddress(person.getAddressId());
             String finalAddress = "%s - %s".formatted( address.getStreet(), address.getCity());
 
-            return new Person(id, person.getName(), finalAddress, person.getAddressId());
+            PersonEntity entity = personRepository.save(new PersonEntity(person.getName(), finalAddress, person.getAddressId()));
+            return new Person(entity.getId(), person.getName(), finalAddress, person.getAddressId());
         } catch (Exception e ) {
             throw new RuntimeException(e);
         } finally {

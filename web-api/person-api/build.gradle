@@ -25,6 +25,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework:spring-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly libs.postgres
 
     implementation libs.opentracing.spring.web.start
     implementation libs.bundles.jeager.open.tracing
