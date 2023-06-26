@@ -30,6 +30,7 @@ dependencies {
 
     implementation libs.opentracing.spring.web.start
     implementation libs.bundles.jeager.open.tracing
+    implementation libs.opentracing.jdbc
 
     compileOnly libs.java.ee.servlet
 

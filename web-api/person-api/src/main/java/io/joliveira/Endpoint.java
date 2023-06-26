@@ -24,7 +24,7 @@ public class Endpoint {
     public Person save(@RequestBody  Person person) {
         Span serverSpan = tracer.activeSpan();
         Span span = tracer
-                .buildSpan("findAddress")
+                .buildSpan("addressApiClient")
                 .asChildOf(serverSpan)
                 .start();
         try {

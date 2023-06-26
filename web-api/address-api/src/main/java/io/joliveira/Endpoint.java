@@ -2,6 +2,7 @@ package io.joliveira;
 
 import io.joliveira.address.v1.Address;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ public class Endpoint {
     private AddressRepository repository;
 
     @GetMapping("address/{id}")
+    @Transactional(readOnly = true)
     public Address findAddressBy(@PathVariable("id") String id) {
         try {
             delay(id);

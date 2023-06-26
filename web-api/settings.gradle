@@ -19,7 +19,11 @@ dependencyResolutionManagement {
 
             library('postgres', 'org.postgresql', 'postgresql').version('42.6.0')
 
+            library('opentracing-jdbc', 'io.opentracing.contrib', 'opentracing-jdbc').version('0.2.14')
+
             bundle('jeager-open-tracing', ['jaeger-core', 'jaeger-thrift'])
+
+
         }
     }
 }

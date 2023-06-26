@@ -8,16 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 
 @org.springframework.context.annotation.Configuration
+@EnableJpaRepositories
 public class Config {
     @Autowired
     private Environment environment;
 
-    //@Bean
+    @Bean
     public Tracer jaegertracer() {
         Configuration.SamplerConfiguration samplerConfig = Configuration
                 .SamplerConfiguration
@@ -43,7 +45,6 @@ public class Config {
 
         return config.getTracer();
     }
-
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
