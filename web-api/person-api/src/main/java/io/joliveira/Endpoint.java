@@ -1,8 +1,8 @@
 package io.joliveira;
 
-import io.joliveira.address.v1.Address;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,8 +28,11 @@ public class Endpoint {
                 .asChildOf(serverSpan)
                 .start();
         try {
-            Address address = addressApiClient.findAddress(person.getAddressId());
-            String finalAddress = "%s - %s".formatted( address.getStreet(), address.getCity());
+            String finalAddress = addressApiClient
+                    .findAddress(person.getAddressId())
+
+                    .map(address -> "%s - %s".formatted( address.getStreet(), address.getCity()))
+                    .orElse(Strings.EMPTY);
 
             PersonEntity entity = personRepository.save(new PersonEntity(person.getName(), finalAddress, person.getAddressId()));
             return new Person(entity.getId(), person.getName(), finalAddress, person.getAddressId());
