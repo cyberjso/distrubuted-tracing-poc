@@ -2,21 +2,6 @@ version: "3.5"
 
 services:
 
-  jaeger-agent:
-    hostname: 'jaeger-agent'
-    container_name: 'jaeger-agent'
-    image: jaegertracing/jaeger-agent
-    command: [ "--reporter.grpc.host-port=otel-col:14260"]
-    ports:
-      - 5775:5775/udp
-      - 6831:6831/udp
-      - 6832:6832/udp
-      - 5778:5778
-    links:
-      - otelcol
-    depends_on:
-      - otelcol
-
   address-api:
     build:
       context: '.'
@@ -26,19 +11,11 @@ services:
     ports:
       - 8081:8081
     links:
-      - jaeger-agent
+      - otelcol
       - application-db
     environment:
-      - 'JAEGER_SAMPLER_TYPE=probabilistic'
-      - 'JAEGER_SAMPLER_PARAM=1'
-      - 'JAEGER_SAMPLER_MANAGER_HOST_PORT=jeager:5778'
-      - 'JAEGER_REPORTER_LOG_SPANS=true'
-      - 'JAEGER_AGENT_HOST=jaeger-agent'
-      - 'JAEGER_AGENT_PORT=6831'
-      - 'JAEGER_REPORTER_FLUSH_INTERVAL=1000'
-      - 'JAEGER_REPORTER_MAX_QUEUE_SIZE=100'
-      - 'JAEGER_SERVICE_NAME=address-api'
       - 'DATABASE_HOST=application-db'
+      - 'OTEL_COLLECTOR_HOST=otel-col'
 
   person-api:
     build:
@@ -49,20 +26,12 @@ services:
     ports:
       - 8080:8080
     links:
-      - jaeger-agent
+      - otelcol
       - application-db
     environment:
       - 'ADDRESS_API_HOST=address-api'
-      - 'JAEGER_SAMPLER_TYPE=probabilistic'
-      - 'JAEGER_SAMPLER_PARAM=1'
-      - 'JAEGER_SAMPLER_MANAGER_HOST_PORT=jeager:5778'
-      - 'JAEGER_REPORTER_LOG_SPANS=true'
-      - 'JAEGER_AGENT_HOST=jaeger-agent'
-      - 'JAEGER_AGENT_PORT=6831'
-      - 'JAEGER_REPORTER_FLUSH_INTERVAL=1000'
-      - 'JAEGER_REPORTER_MAX_QUEUE_SIZE=100'
-      - 'JAEGER_SERVICE_NAME=person-api'
       - 'DATABASE_HOST=application-db'
+      - 'OTEL_COLLECTOR_HOST=otel-col'
 
   application-db:
     image: postgres:13.11
@@ -90,46 +59,29 @@ services:
     volumes:
       - ./opentelemetry-config/opentelemetry-collector-tempo.yaml:/etc/opentelemetry-collector-tempo.yaml
     ports:
-      - "4317"          # OTLP over gRPC receiver
+      - "4317:4317"     # OTLP over gRPC receiver
       - "4318:4318"     # OTLP over HTTP receiver
       - "14260:14260"   # jeager receiver
       - "8888"          # metrics endpoint
     links:
-      - tempo
+      - grafana-tempo
     depends_on:
-      - tempo
+      - grafana-tempo
 
-  tempo:
+  grafana-tempo:
     image: grafana/tempo:latest
     hostname: grafana-tempo
     container_name: grafana-tempo
     command: [ "-multitenancy.enabled=false", "-config.file=/etc/tempo.yaml" ]
     volumes:
       - ./opentelemetry-config/tempo.yaml:/etc/tempo.yaml
-      - ./tempo-data:/tmp/tempo
+      - ./volumes/tempo-data:/tmp/tempo
     ports:
       - "14268"  # jaeger ingest
       - "3200"   # tempo
       - "4317"  # otlp grpc
       - "4318"  # otlp http
       - "9411"   # zipkin
-    links:
-      - prometheus
-    depends_on:
-      - prometheus
-
-  prometheus:
-    image: prom/prometheus:latest
-    hostname: 'prometheus'
-    container_name: 'prometheus'
-    command:
-      - --config.file=/etc/prometheus.yaml
-      - --web.enable-remote-write-receiver
-      - --enable-feature=exemplar-storage
-    volumes:
-      - ./opentelemetry-config/prometheus.yaml:/etc/prometheus.yaml
-    ports:
-      - "9090:9090"
 
   grafana:
     image: grafana/grafana:9.4.3
@@ -143,10 +95,8 @@ services:
       - GF_AUTH_DISABLE_LOGIN_FORM=true
       - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
     depends_on:
-      - prometheus
-      - tempo
+      - grafana-tempo
     links:
-      - prometheus
-      - tempo
+      - grafana-tempo
     ports:
       - "3000:3000"

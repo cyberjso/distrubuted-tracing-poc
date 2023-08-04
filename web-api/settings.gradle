@@ -6,24 +6,18 @@ include 'address-api-ct'
 dependencyResolutionManagement {
     versionCatalogs {
         libs {
-            version('jaeger-open-tracing', "1.8.1")
+            version('otlp-exporter', '1.14.0')
 
             plugin ('spring-boot', 'org.springframework.boot').version('2.7.12')
             plugin ('spring-dep-mgmt', 'io.spring.dependency-management').version('1.1.0')
 
-            library ('jaeger-core', 'io.jaegertracing', 'jaeger-core').versionRef('jaeger-open-tracing')
-            library ('jaeger-thrift', 'io.jaegertracing', 'jaeger-thrift').versionRef('jaeger-open-tracing')
-            library ('opentracing-spring-web-start', 'io.opentracing.contrib', 'opentracing-spring-web-starter').version('3.0.1')
+            library('otlp-trace', 'io.opentelemetry', 'opentelemetry-exporter-otlp-trace').versionRef('otlp-exporter')
+            library('otlp-common', 'io.opentelemetry', 'opentelemetry-exporter-otlp-common').versionRef('otlp-exporter')
+            bundle ('otlp-export', ['otlp-trace', 'otlp-common'])
 
             library ('java-ee-servlet', 'javax.servlet', 'javax.servlet-api').version('3.1.0')
 
             library('postgres', 'org.postgresql', 'postgresql').version('42.6.0')
-
-            library('opentracing-jdbc', 'io.opentracing.contrib', 'opentracing-jdbc').version('0.2.14')
-
-            bundle('jeager-open-tracing', ['jaeger-core', 'jaeger-thrift'])
-
-
         }
     }
 }

@@ -2,6 +2,8 @@ package io.joliveira;
 
 import io.joliveira.address.v1.Address;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.sleuth.Span;
+import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +13,8 @@ import javax.persistence.EntityNotFoundException;
 
 @RestController
 public class Endpoint {
+    @Autowired
+    private Tracer tracer;
 
     @Autowired
     private AddressRepository repository;
@@ -18,6 +22,12 @@ public class Endpoint {
     @GetMapping("address/{id}")
     @Transactional(readOnly = true)
     public Address findAddressBy(@PathVariable("id") String id) {
+        Span serverSpan = tracer.currentSpan();
+        Span span = tracer
+                .spanBuilder()
+                .name("address-api-retrieve")
+                .setParent(serverSpan.context())
+                .start();
         try {
             delay(id);
 
@@ -25,6 +35,8 @@ public class Endpoint {
             return new Address(id, entity.getStreet(), entity.getCity());
         } catch (EntityNotFoundException e) {
             throw new AddressNotFoundException("Address %s not found".formatted(id));
+        } finally {
+            span.end();
         }
     }
 

@@ -1,37 +1,23 @@
-# Copyright The OpenTelemetry Authors
-# SPDX-License-Identifier: Apache-2.0
-
 receivers:
-  jaeger:
+  otlp:
     protocols:
       grpc:
-        endpoint: 0.0.0.0:14260
-      thrift_binary:
-        endpoint: 0.0.0.0:6831
-        queue_size: 5_000
-        max_packet_size: 131_072
-        workers: 50
-        socket_buffer_size: 8_388_608
+      http:
 
 exporters:
+  logging:
+    loglevel: debug
   otlp:
-    endpoint: "tempo:4317"
+    endpoint: "grafana-tempo:4317"
     tls:
       insecure: true
-  logging:
 
 processors:
   batch:
-  filter:
-    metrics:
-      exclude:
-        match_type: strict
-        metric_names:
-          - queueSize
 
 service:
   pipelines:
     traces:
-      receivers: [jaeger]
+      receivers: [otlp]
       processors: [batch]
       exporters: [otlp]
